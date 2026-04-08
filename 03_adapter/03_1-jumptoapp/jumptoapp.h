@@ -1,24 +1,46 @@
 //
-// Created by 35540 on 2026/4/7.
+// Created by 35540 on 2026/4/8.
 //
 
-#ifndef YMODEMBOOTLOADER_INFLASH_H
-#define YMODEMBOOTLOADER_INFLASH_H
+#ifndef YMODEMBOOTLOADER_JUMPTOAPP_H
+#define YMODEMBOOTLOADER_JUMPTOAPP_H
 //******************************** Includes *********************************//
 #include "main.h"
+#include "at24c02_driver.h"
+#include "i2c_bus.h"
 #ifdef MYDEBUG
 #include "elog.h"
 #endif
+
 //******************************** Includes *********************************//
 //---------------------------------------------------------------------------//
 //******************************** Defines **********************************//
-#define FLASH_PARTA_START_SECTOR 0     // 起始扇区为0（扇区0）
-#define FLASH_PARTA_SECTOR_NUM   2     // 使用2个扇区（扇区0 + 扇区1）
-#define FLASH_PARTA_BASE_ADDR    0x00000000 // W25Q128的起始地址（或STM32内部Flash起始地址，根据硬件调整）
-#define FLASH_PARTA_MAX_SIZE     (2 * 16 * 1024) // 2个扇区，每个16KB，总共32KB
+#define JUMPAPP 1
+#define APP_START_ADDR      0x08008000
+/* EEPROM 地址定义 */
+#define EEPROM_OTA_STATE_ADDR         0x00U   /* OTA状态，1字节 */
+#define EEPROM_NEW_APP_SIZE_ADDR      0x01U   /* 待更新App大小，4字节 */
+#define EEPROM_CURR_APP_SIZE_ADDR     0x05U   /* 当前App大小，4字节 */
+
+#define NO_APP_UPDATE               0x00
+#define APP_DOWNLOADING             0x11
+#define APP_DOWNLOAD_COMPLETE       0x22
+
+
 //******************************** Defines **********************************//
 //---------------------------------------------------------------------------//
 //******************************** Typedefs *********************************//
+typedef enum: uint8_t
+{
+  OTA_OK = 0,                 // 成功
+  OTA_ERR_GENERAL,            // 通用错误
+  OTA_ERR_SIZE_INVALID,       // 大小无效
+  OTA_ERR_ERASE_FAILED,       // 擦除失败
+  OTA_ERR_READ_FAILED ,       // 读取失败
+  OTA_ERR_WRITE_FAILED,       // 写入失败
+  OTA_ERR_AES_DECRYPT,        // AES解密失败
+  OTA_ERR_HEADER_INVALID      // 头部无效
+} OTA_Status_t;
 //******************************** Typedefs *********************************//
 //---------------------------------------------------------------------------//
 //**************************** Interface Structs ****************************//
@@ -32,4 +54,4 @@
 //---------------------------------------------------------------------------//
 //******************************** 函数声明 **********************************//
 //******************************** 函数声明 **********************************//
-#endif //YMODEMBOOTLOADER_INFLASH_H
+#endif //YMODEMBOOTLOADER_JUMPTOAPP_H

@@ -6,6 +6,8 @@ add_subdirectory(AT24C02)
 add_subdirectory(INFLASH)
 # 引入 NM25Q128 子模块
 add_subdirectory(NM25Q128)
+# 引入 UARTPRO 子模块
+add_subdirectory(UARTPRO)
 # ------------------------------
 # 定义 BSP 接口库（用于聚合所有 BSP 组件）
 # ------------------------------
@@ -17,6 +19,7 @@ target_link_libraries(bsp INTERFACE
         bsp_at24c02
         bsp_inflash
         bsp_nm25q128
+        bsp_uartpro
 )
 
 # 暴露 BSP 公共头文件路径（如果 BSP 目录下有顶层的公共头文件）

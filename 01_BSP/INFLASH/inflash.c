@@ -56,9 +56,9 @@ uint8_t flash_erase(FLASH_EraseInitTypeDef *p_erase_param)
   ASSERT_NOT_NULL(&p_erase_param);
   // 1. 参数校验
   // 2. 真正有效的安全校验：防止外部传入非法参数把 Bootloader 擦了
-  if (p_erase_param->Sector > 11 ||
-      (p_erase_param->Sector + p_erase_param->NbSectors) > 12) {
-    LOG_DEBUG("erase param out of range!");
+  if (p_erase_param->Sector > 1 ||
+      (p_erase_param->Sector + p_erase_param->NbSectors) > 2) {
+    LOG_DEBUG("erase param out of range! Only Sector 0-1 allowed.");
     return 1;
       }
   uint32_t sector_error = 0;
