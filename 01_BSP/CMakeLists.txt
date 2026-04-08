@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 3.10)
 
-
+# 引入 AT24C02 子模块
+add_subdirectory(AT24C02)
+# 引入 INFLASH 子模块
+add_subdirectory(INFLASH)
+# 引入 NM25Q128 子模块
+add_subdirectory(NM25Q128)
 # ------------------------------
 # 定义 BSP 接口库（用于聚合所有 BSP 组件）
 # ------------------------------
@@ -9,7 +14,9 @@ add_library(bsp INTERFACE)
 
 # 任何链接了 "bsp" 的目标，都会自动链接
 target_link_libraries(bsp INTERFACE
-
+        bsp_at24c02
+        bsp_inflash
+        bsp_nm25q128
 )
 
 # 暴露 BSP 公共头文件路径（如果 BSP 目录下有顶层的公共头文件）

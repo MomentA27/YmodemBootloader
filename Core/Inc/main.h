@@ -57,9 +57,11 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define NM25Q128_CS_Pin GPIO_PIN_14
+#define NM25Q128_CS_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
-
+#define MYDEBUG 1
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

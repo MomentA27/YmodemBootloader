@@ -18,21 +18,19 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "spi.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "user_debug.c"
+#include "at24c02_driver.c"
+#include "nm25q128.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-#ifdef  LOG_TAG
-#undef  LOG_TAG
-#define LOG_TAG       "Ymodem"
-#else
-#define LOG_TAG       "Ymodem"
-#endif
+
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -42,20 +40,7 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-#define LOG_DEBUG(fmt, ...)  log_d("[%s][%s:%d][DEBUG] " fmt "\r\n", \
-LOG_TAG, __func__, __LINE__, ##__VA_ARGS__)
-#define LOG_ERROR(fmt, ...)  log_e("[%s][%s:%d][ERROR] " fmt "\r\n", \
-LOG_TAG, __func__, __LINE__, ##__VA_ARGS__)
-#define ASSERT_NOT_NULL(ptr)                 do { \
-if ((ptr) == NULL) {                              \
-LOG_ERROR("Invalid parameter: %s is NULL", #ptr); \
-while(1);}                                        \
-}while(0)
-#define ASSERT_CONDITION(cond)               do { \
-if (!(cond)) {                                    \
-LOG_ERROR("Condition failed: %s", #cond);         \
-while(1);}                                        \
-}while(0)
+
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -104,8 +89,10 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
-  uint32_t time_ms = 0;
+  AT24C02_Init(&at24c02_iic);
+  W25Q128_Test();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -113,9 +100,7 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-    LOG_DEBUG("init success %d",time_ms);
-    time_ms += 1;
-    LOG_ERROR("init success %d",time_ms);
+
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */

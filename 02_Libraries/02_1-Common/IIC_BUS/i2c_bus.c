@@ -1,12 +1,13 @@
 #include "i2c_bus.h"
 
+
 /**
  * @brief 微秒级延时函数
  * 通过循环执行NOP指令实现精确延时。根据不同的编译器选择相应的内联汇编语法。
  * @param us 延时时间（单位：微秒）
  * @return 无返回值
  */
-static void delay_us(uint32_t us) {
+static void my_delay_us(uint32_t us) {
 	volatile uint32_t count = us * 25;  // 保持原计算逻辑
 
 	while (count--) {
@@ -20,7 +21,6 @@ static void delay_us(uint32_t us) {
 #endif
 	}
 }
-
 /**
  * @brief 配置I2C数据线(SDA)为输出模式
  * 该函数将指定I2C总线的数据线引脚配置为开漏输出模式，
@@ -119,13 +119,13 @@ uint8_t SDA_Input(const i2c_bus_t *bus)
 void I2CStart(const i2c_bus_t *bus)
 {
     SDA_Output(bus,1);
-		delay_us(2);
+		DWT_Delay_us(2);
     SCL_Output(bus,1);
-		delay_us(1);
+		DWT_Delay_us(1);
     SDA_Output(bus,0);
-		delay_us(1);
+		DWT_Delay_us(1);
     SCL_Output(bus,0);
-		delay_us(1);
+		DWT_Delay_us(1);
 }
 
 /**
@@ -137,13 +137,13 @@ void I2CStart(const i2c_bus_t *bus)
 void I2CStop(const i2c_bus_t*bus)
 {
     SCL_Output(bus,0);
-		delay_us(2);
+		DWT_Delay_us(2);
     SDA_Output(bus,0);
-		delay_us(1);
+		DWT_Delay_us(1);
     SCL_Output(bus,1);
-		delay_us(1);
+		DWT_Delay_us(1);
     SDA_Output(bus,1);
-		delay_us(1);
+		DWT_Delay_us(1);
 
 }
 
@@ -165,7 +165,7 @@ unsigned char I2CWaitAck(const i2c_bus_t *bus)
     while(SDA_Input(bus))
     {
         cErrTime--;
-				delay_us(1);
+				DWT_Delay_us(1);
         if (0 == cErrTime)
         {
             SDA_Output_Mode(bus);
@@ -175,7 +175,7 @@ unsigned char I2CWaitAck(const i2c_bus_t *bus)
     }
     SDA_Output_Mode(bus);
     SCL_Output(bus,0);
-		delay_us(2);
+		DWT_Delay_us(2);
     return SUCCESS;
 }
 
@@ -188,11 +188,11 @@ unsigned char I2CWaitAck(const i2c_bus_t *bus)
 void I2CSendAck(const i2c_bus_t *bus)
 {
     SDA_Output(bus,0);
-		delay_us(1);
+		DWT_Delay_us(1);
     SCL_Output(bus,1);
-		delay_us(1);
+		DWT_Delay_us(1);
     SCL_Output(bus,0);
-		delay_us(1);
+		DWT_Delay_us(1);
 
 }
 
@@ -205,11 +205,11 @@ void I2CSendAck(const i2c_bus_t *bus)
 void I2CSendNotAck(const i2c_bus_t *bus)
 {
     SDA_Output(bus,1);
-		delay_us(1);
+		DWT_Delay_us(1);
     SCL_Output(bus,1);
-		delay_us(1);
+		DWT_Delay_us(1);
     SCL_Output(bus,0);
-		delay_us(2);
+		DWT_Delay_us(2);
 
 }
 
@@ -226,16 +226,16 @@ void I2CSendByte(const i2c_bus_t *bus,unsigned char cSendByte)
     while (i--)
     {
         SCL_Output(bus,0);
-        delay_us(2);
+        DWT_Delay_us(2);
         SDA_Output(bus, cSendByte & 0x80);
-				delay_us(1);
+				DWT_Delay_us(1);
         cSendByte += cSendByte;
-				delay_us(1);
+				DWT_Delay_us(1);
         SCL_Output(bus,1);
-				delay_us(1);
+				DWT_Delay_us(1);
     }
     SCL_Output(bus,0);
-		delay_us(2);
+		DWT_Delay_us(2);
 }
 
 /**
@@ -253,9 +253,9 @@ unsigned char I2CReceiveByte(const i2c_bus_t *bus)
     {
         cR_Byte += cR_Byte;
         SCL_Output(bus,0);
-				delay_us(2);
+				DWT_Delay_us(2);
         SCL_Output(bus,1);
-				delay_us(1);
+				DWT_Delay_us(1);
         cR_Byte |=  SDA_Input(bus);
     }
     SCL_Output(bus,0);
@@ -272,7 +272,7 @@ unsigned char I2CReceiveByte(const i2c_bus_t *bus)
  * @param data 待写入的数据
  * @return 成功返回0，失败返回1
  */
-uint8_t I2C_Write_One_Byte(i2c_bus_t *bus, uint8_t daddr,uint8_t reg,uint8_t data)
+uint8_t I2C_Write_One_Byte(const i2c_bus_t *bus, uint8_t daddr,uint8_t reg,uint8_t data)
 {
   I2CStart(bus);
 
@@ -287,7 +287,7 @@ uint8_t I2C_Write_One_Byte(i2c_bus_t *bus, uint8_t daddr,uint8_t reg,uint8_t dat
 	I2CSendByte(bus,data);
 	I2CWaitAck(bus);
   I2CStop(bus);
-	delay_us(1);
+	DWT_Delay_us(1);
 	return 0;
 }
 
@@ -301,7 +301,7 @@ uint8_t I2C_Write_One_Byte(i2c_bus_t *bus, uint8_t daddr,uint8_t reg,uint8_t dat
  * @param buff 指向待写入数据缓冲区的指针
  * @return 成功返回0，失败返回1
  */
-uint8_t I2C_Write_Multi_Byte(i2c_bus_t *bus, uint8_t daddr,uint8_t reg,uint8_t length,uint8_t buff[])
+uint8_t I2C_Write_Multi_Byte(const i2c_bus_t *bus, uint8_t daddr,uint8_t reg,uint8_t length,uint8_t buff[])
 {
 	unsigned char i;
   I2CStart(bus);
@@ -320,7 +320,7 @@ uint8_t I2C_Write_Multi_Byte(i2c_bus_t *bus, uint8_t daddr,uint8_t reg,uint8_t l
 		I2CWaitAck(bus);
 	}
   I2CStop(bus);
-	delay_us(1);
+	DWT_Delay_us(1);
 	return 0;
 }
 
@@ -332,7 +332,7 @@ uint8_t I2C_Write_Multi_Byte(i2c_bus_t *bus, uint8_t daddr,uint8_t reg,uint8_t l
  * @param reg 寄存器地址
  * @return 读取到的数据
  */
-unsigned char I2C_Read_One_Byte(i2c_bus_t *bus, uint8_t daddr,uint8_t reg)
+unsigned char I2C_Read_One_Byte(const i2c_bus_t *bus, uint8_t daddr,uint8_t reg)
 {
 	unsigned char dat;
 	I2CStart(bus);
@@ -360,7 +360,7 @@ unsigned char I2C_Read_One_Byte(i2c_bus_t *bus, uint8_t daddr,uint8_t reg)
  * @param buff 指向存储读取结果的缓冲区指针
  * @return 成功返回0，失败返回1
  */
-uint8_t I2C_Read_Multi_Byte(i2c_bus_t *bus, uint8_t daddr, uint8_t reg, uint8_t length, uint8_t buff[])
+uint8_t I2C_Read_Multi_Byte(const i2c_bus_t *bus, uint8_t daddr, uint8_t reg, uint8_t length, uint8_t buff[])
 {
 	unsigned char i;
 	I2CStart(bus);

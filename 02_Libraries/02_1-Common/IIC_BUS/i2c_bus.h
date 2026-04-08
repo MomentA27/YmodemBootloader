@@ -2,7 +2,7 @@
 #define __I2C_BUS_H
 
 #include "stm32f4xx_hal.h"
-
+#include "DWT_delay.h"
 typedef struct
 {
     GPIO_TypeDef * I2C_SDA_PORT;
@@ -21,9 +21,9 @@ void I2CSendByte             (const i2c_bus_t *bus, unsigned char cSendByte);
 unsigned char I2CReceiveByte (const i2c_bus_t *bus);
 void I2CInit                 (const i2c_bus_t *bus);
 
-uint8_t I2C_Write_One_Byte(i2c_bus_t *bus, uint8_t daddr,uint8_t reg,uint8_t data);
-uint8_t I2C_Write_Multi_Byte(i2c_bus_t *bus, uint8_t daddr,uint8_t reg,uint8_t length,uint8_t buff[]);
-unsigned char I2C_Read_One_Byte(i2c_bus_t *bus, uint8_t daddr,uint8_t reg);
-uint8_t I2C_Read_Multi_Byte(i2c_bus_t *bus, uint8_t daddr, uint8_t reg, uint8_t length, uint8_t buff[]);
+uint8_t I2C_Write_One_Byte(const i2c_bus_t *bus, uint8_t daddr,uint8_t reg,uint8_t data);
+uint8_t I2C_Write_Multi_Byte(const i2c_bus_t *bus, uint8_t daddr,uint8_t reg,uint8_t length,uint8_t buff[]);
+unsigned char I2C_Read_One_Byte(const i2c_bus_t *bus, uint8_t daddr,uint8_t reg);
+uint8_t I2C_Read_Multi_Byte(const i2c_bus_t *bus, uint8_t daddr, uint8_t reg, uint8_t length, uint8_t buff[]);
 
 #endif
