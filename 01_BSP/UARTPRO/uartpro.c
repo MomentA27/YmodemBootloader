@@ -3,6 +3,8 @@
 //
 //******************************** Includes *********************************//
 #include "uartpro.h"
+
+#include <stdio.h>
 //******************************** Includes *********************************//
 //---------------------------------------------------------------------------//
 //******************************** Defines **********************************//
@@ -75,10 +77,16 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
       uart_buf_t *current_buf = &uart1_rx_ctrl.buf[uart1_rx_ctrl.active_idx];
       current_buf->len = Size; // YMODEM块大小固定，Size应为1024
       current_buf->state = UART_BUF_FULL; // 标记为满，等待处理
-
+      LOG_DEBUG("buf[%d] FULL, len=%d", uart1_rx_ctrl.active_idx, Size);
       // 2. 切换活跃缓冲区（下次DMA写入buf[1]）
       uart1_rx_ctrl.active_idx = 1 - uart1_rx_ctrl.active_idx;
-
+      // 6. 检查另一个缓冲区是否可用
+      if (uart1_rx_ctrl.buf[uart1_rx_ctrl.active_idx].state != UART_BUF_IDLE)
+      {
+        // 两个缓冲区都为FULL（应用层处理过慢），无法切换
+        LOG_ERROR("Both buffers FULL, data lost");
+        return;
+      }
       // 3. 启动下一次DMA接收（指向新的活跃缓冲区）
       HAL_UARTEx_ReceiveToIdle_DMA(&huart1,
                                    uart1_rx_ctrl.buf[uart1_rx_ctrl.active_idx].buf,

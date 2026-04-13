@@ -333,6 +333,72 @@ W25Q_StatusTypeDef W25Q128_PageProgram(uint32_t addr, const uint8_t *pData, uint
 }
 
 /**
+ * @brief 跨页写入数据（自动处理分页逻辑）
+ * @note 写入前必须确保目标地址区域已被擦除（擦除后为0xFF），否则写入会失败
+ * @param[in] addr 写入起始地址
+ * @param[in] pData 待写入数据指针（const修饰，支持只读数据传入）
+ * @param[in] len 写入数据总长度
+ * @return 执行状态，w25q_status_t类型
+ */
+W25Q_StatusTypeDef W25Q128_WriteData(uint32_t addr, const uint8_t *pData, uint32_t len)
+{
+    W25Q_StatusTypeDef status = W25Q_OK;
+    uint32_t remaining_len = len;    // 剩余未写入长度
+    uint32_t current_addr = addr;    // 当前写入地址
+    const uint8_t *current_data = pData;  // 当前数据指针
+
+    // 1. 基础参数合法性校验
+    if (pData == NULL || len == 0)
+    {
+        LOG_ERROR("Invalid parameters: pData=NULL or len=0");
+        return W25Q_DATA_LEN_ERROR;
+    }
+
+    // 2. 地址范围校验（包含写入后总地址范围）
+    if (addr > W25Q128_MAX_ADDR || (addr + len - 1) > W25Q128_MAX_ADDR)
+    {
+        LOG_ERROR("Address out of range: 0x%06X + %lu > 0x%06X",
+                  (unsigned int)addr, len, (unsigned int)W25Q128_MAX_ADDR);
+        return W25Q_ADDR_OUT_OF_RANGE;
+    }
+
+    LOG_DEBUG("Cross-page write start: Addr=0x%06X, Total Len=%lu", (unsigned int)addr, len);
+
+    // 3. 循环处理跨页写入
+    while (remaining_len > 0 && status == W25Q_OK)
+    {
+        // 计算当前页剩余可写入字节数（页内偏移 = current_addr & 0xFF）
+        uint16_t page_remain = W25Q128_PAGE_SIZE - (current_addr & 0xFF);
+        // 本次写入长度：取「剩余数据长度」和「当前页可写长度」的较小值
+        uint16_t write_len = (remaining_len < page_remain) ? (uint16_t)remaining_len : page_remain;
+
+        LOG_DEBUG("Writing page segment: Addr=0x%06X, Len=%d, Remaining=%lu",
+                  (unsigned int)current_addr, write_len, remaining_len);
+
+        // 4. 执行单页写入（自动包含写使能+等待忙状态）
+        status = W25Q128_PageProgram(current_addr, current_data, write_len);
+        if (status != W25Q_OK)
+        {
+            LOG_ERROR("Page program failed at 0x%06X, len=%d, status=%d",
+                      (unsigned int)current_addr, write_len, status);
+            break;
+        }
+
+        // 5. 更新指针和剩余长度
+        current_addr += write_len;
+        current_data += write_len;
+        remaining_len -= write_len;
+    }
+
+    // 6. 写入完成校验
+    if (status == W25Q_OK && remaining_len == 0)
+    {
+        LOG_DEBUG("Cross-page write completed successfully, total len=%lu", len);
+    }
+
+    return status;
+}
+/**
  * @brief 从W25Q128读取数据
  * @details 从指定地址读取任意长度的数据
  * @param addr 读取的起始地址

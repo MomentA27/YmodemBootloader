@@ -63,6 +63,7 @@ W25Q_StatusTypeDef W25Q128_SectorErase(uint32_t addr);
 W25Q_StatusTypeDef W25Q128_BlockErase64K(uint32_t addr);
 W25Q_StatusTypeDef W25Q128_ChipErase(void);
 W25Q_StatusTypeDef W25Q128_PageProgram(uint32_t addr, const uint8_t *pData, uint16_t len);
+W25Q_StatusTypeDef W25Q128_WriteData(uint32_t addr, const uint8_t *pData, uint32_t len);
 W25Q_StatusTypeDef W25Q128_ReadData(uint32_t addr, uint8_t *pData, uint32_t len);
 void W25Q128_Test(void);
 //******************************** 函数声明 **********************************//

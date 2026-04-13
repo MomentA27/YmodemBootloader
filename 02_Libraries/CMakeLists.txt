@@ -15,7 +15,9 @@ add_subdirectory(02_2-ThirdParty/SEGGER)
 # 定义 Libraries 接口库（用于聚合所有 Libraries 组件）
 # ------------------------------
 # 使用 INTERFACE 关键字，表明这是一个接口库
-add_library(libraries INTERFACE)
+add_library(libraries INTERFACE
+        02_1-Common/Ymodem/Ymodem.c
+        02_1-Common/Ymodem/Ymodem.h)
 
 # 链接模块（公开链接）
 # 任何链接了 "libraries" 的目标，都会自动链接

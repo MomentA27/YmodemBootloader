@@ -53,5 +53,11 @@ typedef enum: uint8_t
 //**************************** Extern Variables *****************************//
 //---------------------------------------------------------------------------//
 //******************************** 函数声明 **********************************//
+void JumpToApp(void);
+void OTA_StateManager(void);
+OTA_Status_t ExA_To_ExB_AES(uint32_t *fl_size);
+OTA_Status_t App_To_ExA(uint32_t fl_size);
+OTA_Status_t ExB_To_App(uint32_t fl_size);
+OTA_Status_t ExA_To_App(uint32_t fl_size);
 //******************************** 函数声明 **********************************//
 #endif //YMODEMBOOTLOADER_JUMPTOAPP_H

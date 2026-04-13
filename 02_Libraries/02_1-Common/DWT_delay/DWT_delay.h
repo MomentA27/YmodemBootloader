@@ -31,5 +31,11 @@ static inline void DWT_Delay_us(uint32_t us)
   while ((DWT->CYCCNT - start_cnt) < delay_ticks);
 }
 
+// 安全的DWT循环计时宏
+#define DWT_TIMEOUT_CHECK(start, timeout_us)              \
+(((DWT->CYCCNT) >= (start)) ?                             \
+((DWT->CYCCNT) - (start) > (timeout_us) * CPU_FREQ_MHZ) : \
+((UINT32_MAX - (start) + (DWT->CYCCNT) + 1) > (timeout_us) * CPU_FREQ_MHZ))
+
 
 #endif //RTOS_PROJECT_DWT_DELAY_H
